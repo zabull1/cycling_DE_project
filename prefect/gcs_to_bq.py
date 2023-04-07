@@ -16,8 +16,6 @@ def extract_from_gcs(year: str) -> Path:
     gcs_path = Path(f"trips/{year}/raw_/*.csv")
     gcs_block = GcsBucket.load("gcs-bucket")
     contents = gcs_block.list_blobs(f"trips/{year}/")
-    # gcs_block.get_directory(from_path=gcs_path, local_path=gcs_path)
-    # return Path(gcs_path)
     return contents
 
 @task
@@ -40,17 +38,28 @@ def get_dataframe(storage_path: str) -> pd.DataFrame:
 def transform(df) -> pd.DataFrame:
     """Data cleaning example"""
 
-    # df['Rental Id']= df['Rental Id'].astype("STRING")
-    # df['Bike Id']= df['Bike Id'].astype("STRING")
-    # df['End Date'] = pd.to_datetime(df['End Date'])
-    # df['EndStation Id']= df['EndStation Id'].astype("STRING")
-    # df['EndStation Name']= df['EndStation Name'].astype("STRING")
-    # df['Start Date'] = pd.to_datetime(df['Start Date'])
-    # df['StartStation Id']= df['StartStation Id'].astype("STRING")
-    # df['StartStation Name']= df['StartStation Name'].astype("STRING") 
+    df['Rental Id']= df['Rental Id'].astype("STRING")
+    df['Bike Id']= df['Bike Id'].astype("STRING")
+    df['End Date'] = pd.to_datetime(df['End Date'])
+    df['EndStation Id']= df['EndStation Id'].astype("STRING")
+    df['EndStation Name']= df['EndStation Name'].astype("STRING")
+    df['Start Date'] = pd.to_datetime(df['Start Date'])
+    df['StartStation Id']= df['StartStation Id'].astype("STRING")
+    df['StartStation Name']= df['StartStation Name'].astype("STRING") 
     df['Duration']= df['Duration'].astype("int")
 
+      df['Rental Id']= df['Rental Id'].astype("string")
+        df['Bike Id']= df['Bike Id'].astype("string")
+        df['End Date'] = pd.to_datetime(df['End Date'])
+        df['EndStation Id']= df['EndStation Id'].astype("string")
+        df['EndStation Name']= df['EndStation Name'].astype("string")
+        df['Start Date'] = pd.to_datetime(df['Start Date'])
+        df['StartStation Id']= df['StartStation Id'].astype("string")
+        df['StartStation Name']= df['StartStation Name'].astype("string") 
+        df['Duration']= df['Duration'].astype("int")
+
     df = df[df['Duration'] > 1]
+    
     df = df.astype('str')
 
     # dataframes = []
@@ -74,11 +83,16 @@ def transform(df) -> pd.DataFrame:
     #         }, parse_dates=['Start Date','End Date' ])
     # df.info()
 
-    # df.rename({'Rental Id': 'Rental_Id',
-    #             'Bike Id': 'Bike_Id',
-    #             'End Date': 'End_Date',
-    #             })
-    # df['Rental Id'] = .dropna()
+    df = df.rename(columns={ 'Rental Id': 'Rental_Id',
+                'Bike Id': 'Bike_Id',
+                'End Date': 'End_Date',
+                'Start Date': 'Start_Date',
+                'EndStation Id': 'EndStation_Id',
+                'EndStation Name': 'EndStation_Name',
+                'StartStation Id': 'StartStation_Id',
+                'StartStation Name': 'StartStation_Name',
+                })
+    
     # df['Rental Id']= df['Rental Id'].astype("object")
     # df['Bike Id']= df['Bike Id'].astype("object")
     # # df['End Date'] = pd.to_datetime(df['End Date'])
@@ -143,14 +157,12 @@ def bigquery_create_table_flow():
         SchemaField('Start_Date', field_type="STRING"),
         SchemaField('StartStation_Id', field_type="STRING"),
         SchemaField('StartStation_Name', field_type="STRING"),
-        SchemaField('Duration', field_type="STRING" ),
-        # SchemaField('Bike Id', field_type="STRING", mode="REQUIRED"),
-        # SchemaField('Bike Id', field_type="STRING", mode="REQUIRED"),
+        SchemaField('Duration', field_type="STRING" )
     ]
     result = bigquery_create_table(
         dataset="cycling_data_all",
-        table="test_table",
-        schema=schema,
+        table="data",
+        schema= schema,
         gcp_credentials=gcp_credentials_block
     )
     return result
@@ -162,10 +174,18 @@ def example_bigquery_load_file_flow(df):
         dataset="cycling_data_all",
         table="test_table",
         path=df,
+         schema= schema,
         gcp_credentials=gcp_credentials_block,
        
     )
    return result
+
+# @task(log_prints=True, retries=3)
+# def save_as_raw(unzipped_files: list, year: str) -> None:
+#     gcs = GcsBucket.load('gcs-bucket')
+
+#     for index, content in enumerate(unzipped_files, start=1):
+#         gcs.upload_from_file_object(BytesIO(content[1]), f'trips/raw/{year}/journey_Data_Extract-{index:02}.csv')
 
 @task()
 def write_bq(df) -> None:
@@ -211,7 +231,7 @@ def write_bq(df) -> None:
 
 @flow()
 def etl_gcs_to_bq():
-    #bigquery_create_table_flow()
+    bigquery_create_table_flow()
     # """Main ETL flow to load data into Big Query"""
   
     #years = [(2012, 18 ),(2013, 14 ), (2014, 20)]

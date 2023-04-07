@@ -17,10 +17,16 @@ def _evp_pkey_derive(backend: "Backend", evp_pkey, peer_public_key) -> bytes:
     ctx = backend._ffi.gc(ctx, backend._lib.EVP_PKEY_CTX_free)
     res = backend._lib.EVP_PKEY_derive_init(ctx)
     backend.openssl_assert(res == 1)
-    res = backend._lib.EVP_PKEY_derive_set_peer(ctx, peer_public_key._evp_pkey)
-    if res != 1:
-        errors_with_text = backend._consume_errors_with_text()
-        raise ValueError("Error computing shared key.", errors_with_text)
+
+    if backend._lib.Cryptography_HAS_EVP_PKEY_SET_PEER_EX:
+        res = backend._lib.EVP_PKEY_derive_set_peer_ex(
+            ctx, peer_public_key._evp_pkey, 0
+        )
+    else:
+        res = backend._lib.EVP_PKEY_derive_set_peer(
+            ctx, peer_public_key._evp_pkey
+        )
+    backend.openssl_assert(res == 1)
 
     keylen = backend._ffi.new("size_t *")
     res = backend._lib.EVP_PKEY_derive(ctx, backend._ffi.NULL, keylen)
@@ -29,8 +35,8 @@ def _evp_pkey_derive(backend: "Backend", evp_pkey, peer_public_key) -> bytes:
     buf = backend._ffi.new("unsigned char[]", keylen[0])
     res = backend._lib.EVP_PKEY_derive(ctx, buf, keylen)
     if res != 1:
-        errors_with_text = backend._consume_errors_with_text()
-        raise ValueError("Error computing shared key.", errors_with_text)
+        errors = backend._consume_errors()
+        raise ValueError("Error computing shared key.", errors)
 
     return backend._ffi.buffer(buf, keylen[0])[:]
 

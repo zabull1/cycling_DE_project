@@ -11,34 +11,41 @@ from prefect_gcp import GcpCredentials
 from prefect_gcp.cloud_storage import GcsBucket
 from chardet.universaldetector import UniversalDetector
 
-@task()
+@task(log_prints=True, name="Read cycling data", retries=3)
 def extract_from_web(url: str) -> bytes:
-    r = requests.get(url)
-    return r.content
+    """Read cycling data from web"""
+    response = requests.get(url, timeout=4)
+    if response.status_code == 200:
+        return response.content
+        print("Successfully fetched data from web.")
+    else:
+        print(f"ERROR: {response.status_code}")  
 
-@task()
+
+
+@task(log_prints=True, name="Unzip cycling data", retries=3)
 def unzip_file(content: bytes, retries=3)-> list:
+    """Unzip cycling data"""
+    print("unzipping........")
     zipfile_obj = zipfile.ZipFile(BytesIO(content))
     unzipped_files = []
     for file_name in zipfile_obj.namelist():
         # Extract each file in memory
         file_content = zipfile_obj.read(file_name)
         unzipped_files.append((file_name, file_content))
+    print("Successfully unzip data.")
     return unzipped_files    
 
-@task(log_prints=True, retries=3)
-def save_as_raw(unzipped_files: list, year: str) -> None:
-    gcs = GcsBucket.load('gcs-bucket')
-
-    for index, content in enumerate(unzipped_files, start=1):
-        gcs.upload_from_file_object(BytesIO(content[1]), f'trips/raw/{year}/journey_Data_Extract-{index:02}.csv')
         
 
-@task(log_prints=True, retries=3)
+@task(log_prints=True, name= "save cycling data to Google Cloud Storage in parquet format", retries=3)
 def save_as_parquet(unzipped_files: list, year: str) -> None:
+    """save cycling data to Google Cloud Storage in parquet format"""
+
     gcs = GcsBucket.load('gcs-bucket')
     
     for index , content in enumerate(unzipped_files, start=1):
+
         storage_path_parquet = f'trips/parquet_/{year}/journey_Data_Extract_{year}-{index:02}.parquet'
        
         #decode content encoding
@@ -51,137 +58,114 @@ def save_as_parquet(unzipped_files: list, year: str) -> None:
 
         df = pd.read_csv(BytesIO(content[1]), encoding=encoding)
 
-        df['Rental Id']= df['Rental Id'].astype("string")
-        df['Bike Id']= df['Bike Id'].astype("string")
-        df['End Date'] = pd.to_datetime(df['End Date'])
-        df['EndStation Id']= df['EndStation Id'].astype("string")
-        df['EndStation Name']= df['EndStation Name'].astype("string")
-        df['Start Date'] = pd.to_datetime(df['Start Date'])
-        df['StartStation Id']= df['StartStation Id'].astype("string")
-        df['StartStation Name']= df['StartStation Name'].astype("string") 
-        df['Duration']= df['Duration'].astype("int")
-        
+        df =df.astype(str)
         
         buffer = BytesIO()
         df.to_parquet(buffer, engine='auto', compression='snappy')
         buffer.seek(0)
         gcs.upload_from_file_object(buffer, storage_path_parquet)
+
+        print(f"Successfully save {storage_path_parquet} to Google Cloud Storage.")
+
+
+@task(log_prints=True, name= "Get parquet from Google Cloud Storage", retries=3)
+def get_dataframe(storage_path: str) -> pd.DataFrame:
+    """Gets the parquet file from GCS and converts it to a dataframe"""
+    gcs = GcsBucket.load('gcs-bucket')
+    temp_file = BytesIO()
+    gcs.download_object_to_file_object(
+        from_path=storage_path, 
+        to_file_object=temp_file
+    )
+
+    temp_file.seek(0)
+    df = pd.read_parquet((temp_file))
   
+    return df  
+
+@task(log_prints =True, name= "enforce column names and datatypes")
+def transform(df) -> pd.DataFrame:
+    """Data cleaning: enforcing column names and datatypes"""
+
+    df['Rental Id']= df['Rental Id'].astype("string")
+    df['Bike Id']= df['Bike Id'].astype("string")
+    df['End Date'] = pd.to_datetime(df['End Date'])
+    df['EndStation Id']= df['EndStation Id'].astype("string")
+    df['EndStation Name']= df['EndStation Name'].astype("string")
+    df['Start Date'] = pd.to_datetime(df['Start Date'])
+    df['StartStation Id']= df['StartStation Id'].astype("string")
+    df['StartStation Name']= df['StartStation Name'].astype("string") 
+    df['Duration']= df['Duration'].astype("float")
+
+    df['Duration'].fillna(0)
+   
+
+    df = df.rename(columns={ 
+                'Rental Id': 'Rental_Id',
+                'Bike Id': 'Bike_Id',
+                'End Date': 'End_Date',
+                'Start Date': 'Start_Date',
+                'EndStation Id': 'EndStation_Id',
+                'EndStation Name': 'EndStation_Name',
+                'StartStation Id': 'StartStation_Id',
+                'StartStation Name': 'StartStation_Name',
+                })
+
+    df = df[
+        [
+        'Rental_Id',
+        'Bike_Id',
+        'End_Date',
+        'Start_Date',
+        'EndStation_Id',
+        'EndStation_Name',
+        'StartStation_Id',
+        'StartStation_Name',
+        'Duration'
+        ] 
+    ]            
+
+    print("Successfully enforced column names and data types.")
+    return df
 
 
 
-@flow(name='Save from web to Cloud Storage')
-def load_to_gcs(years : list) -> None:
+
+@task(log_prints=True, name="Write to BigQuery")
+def write_bq(df) -> None:
+    """Write DataFrame to BiqQuery"""
+
+    gcp_credentials_block = GcpCredentials.load("gcs-credentials")
+   
+    df.to_gbq(
+            destination_table="cycling_data_all.test",
+            project_id="balmy-component-381417",
+            credentials=gcp_credentials_block.get_credentials_from_service_account(),
+            chunksize=10000,
+            if_exists="append",
+        )
+
+    print("Succesfully uploaded data to BiqQuery")
+
+
+@flow(name='Save from web to Cloud Storage to bigQuery')
+def web_to_gcs_to_bq() -> None:
+    """Orchestrates the flow of cycling data from web to BigQuery via Google Cloud Storage"""
+    year = 2014
+    num = 20  #number of files in the directory
+    url = f"https://cycling.data.tfl.gov.uk/usage-stats/cyclehireusagestats-{year}.zip"
     
-    for year in years:
-        url = f"https://cycling.data.tfl.gov.uk/usage-stats/cyclehireusagestats-{year}.zip"
+    # content = extract_from_web(url)
+    # unzipped_content = unzip_file(content)
+    # save_as_parquet(unzipped_content, year)
 
-        content = extract_from_web(url)
-        unzipped_content = unzip_file(content)
-        # save_as_raw(unzipped_content, year)
-        save_as_parquet(unzipped_content, year)
- 
+    for index in list(range(1,num+1)):
+        storage_path = f'trips/parquet/{year}/journey_Data_Extract-{index:02}.parquet'
+        df = get_dataframe(storage_path)
+        transformed_df = transform(df)
+        write_bq(transformed_df)
+
+    print("Succesfully orchestrated cycling data from web to BiqQuery  via Google Cloud Storage")
 
 if __name__ == "__main__":
- years = [2012,2013,2014]
- load_to_gcs(years)
- 
-
-
-
-
-
-
-
-#@task(log_prints=True, name="fetch data", retries=3)
-# def fetch(url: str) -> pd.DataFrame:
-#     """Fetches the API and returns the latest card data as a pandas dataframe"""
-#     response = requests.get(url, timeout=5)
-#     if response.status_code == 200:
-#         json = response.content
-       
-#         # df = pd.read_json(json)
-#         # print("Successfully fetched data from API.")
-#         # return df, update_ts
-#         return json
-#     else:
-#         print(f"[ERROR] {response.status_code}.")
-
-# def fetch(url: str) -> pd.DataFrame:
-#     """Fetches the API and returns the latest card data as a pandas dataframe"""
-#     df = pd.read_csv(url)
-#     print("Successfully fetched data from API.")
-#     return df
-       
-        
-    
-
-# @task()
-# def write_gcs(path: Path) -> None:
-#     """Upload local parquet file to GCS"""
-#     gcs_block = GcsBucket.load("zoom-gcs")
-#     gcs_block.upload_from_path(from_path=path, to_path=path)
-#     return
-
-# @flow(log_prints=True, name="[Magic: The Gathering] API to BigQuery")
-# # def api_to_bq_orchestration(
-# #     dataset: str, download_parquet: bool = False, update_prod_table: bool = True
-# # ) -> None:
-# def api_to_bq_orchestration() -> None:
-#     #url = "https://cycling.data.tfl.gov.uk/usage-stats/cyclehireusagestats-2014.zip"
-#     url = "https://cycling.data.tfl.gov.uk/usage-stats/97JourneyDataExtract14Feb2018-20Feb2018.csv"
-#     df = fetch(url)
-#     write_gcs(from_path=file, to_path="A")
-
-#       df = fetch(dataset_url)
-#     df_clean = clean(df)
-#     path = write_local(df_clean, color, dataset_file)
-#     # write_gcs(path)
-
-
-
-
-
-
-
-# @task(log_prints=True)
-# def save_as_parquet(content: bytes, url: str, storage_path_parquet: str) -> pd.DataFrame:
-#     gcs = GcsBucket.load('gcs-creds')
-#     if url.endswith('.csv'):
-#         df = pd.read_csv(BytesIO(content))
-#     if url.endswith('.csv.gz'):
-#         df = pd.read_csv(BytesIO(content), compression='gzip')
-#     df.columns = [c.lower() for c in df.columns]
-#     print(df.head())
-#     print('Rows loaded:', len(df))
-#     buffer = BytesIO()
-#     df.to_parquet(buffer, engine='auto', compression='snappy')
-#     buffer.seek(0)
-#     gcs.upload_from_file_object(buffer, storage_path_parquet)
-
-# if __name__ == '__main__':
-#     color = 'yellow'
-#     year = 2021
-#     month = 1
-    
-#     load_to_gcs(color, year, month)
-
-
-# # Unzip the file in memory
-# zipfile_obj = zipfile.ZipFile(io.BytesIO(content))
-# unzipped_files = []
-# for file_name in zipfile_obj.namelist():
-#     # Extract each file in memory
-#     file_content = zipfile_obj.read(file_name)
-#     unzipped_files.append((file_name, file_content))
-
-# Upload the unzipped files to GCS
-# for file_name, file_content in unzipped_files:
-#     new_blob = bucket.blob(file_name)
-#     new_blob.upload_from_string(file_content)
-
-    #url = "https://cycling.data.tfl.gov.uk/usage-stats/97JourneyDataExtract14Feb2018-20Feb2018.csv"
-    #storage_path = f'trips/zip/cyclehireusagestats-2014.zip'
-    #storage_path_parquet = f'trips/parquet/{color}_tripdata_{year}-{month:02}.parquet'
-
-   #save_as_parquet(content, url, storage_path_parquet)
+ web_to_gcs_to_bq()

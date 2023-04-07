@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 from .imports import lazy_import
-from .version import version as __version__  # noqa
+from .version import version as __version__  # noqa: F401
 
 
-__all__ = [  # noqa
+__all__ = [
     "AbortHandshake",
     "basic_auth_protocol_factory",
     "BasicAuthWebSocketServerProtocol",
     "broadcast",
-    "ClientConnection",
+    "ClientProtocol",
     "connect",
     "ConnectionClosed",
     "ConnectionClosedError",
@@ -40,7 +40,7 @@ __all__ = [  # noqa
     "RedirectHandshake",
     "SecurityError",
     "serve",
-    "ServerConnection",
+    "ServerProtocol",
     "Subprotocol",
     "unix_connect",
     "unix_serve",
@@ -60,7 +60,7 @@ lazy_import(
         "basic_auth_protocol_factory": ".legacy.auth",
         "BasicAuthWebSocketServerProtocol": ".legacy.auth",
         "broadcast": ".legacy.protocol",
-        "ClientConnection": ".client",
+        "ClientProtocol": ".client",
         "connect": ".legacy.client",
         "unix_connect": ".legacy.client",
         "WebSocketClientProtocol": ".legacy.client",
@@ -93,7 +93,7 @@ lazy_import(
         "WebSocketProtocolError": ".exceptions",
         "protocol": ".legacy",
         "WebSocketCommonProtocol": ".legacy.protocol",
-        "ServerConnection": ".server",
+        "ServerProtocol": ".server",
         "serve": ".legacy.server",
         "unix_serve": ".legacy.server",
         "WebSocketServerProtocol": ".legacy.server",

@@ -1,0 +1,41 @@
+###
+### A complete description of a Prefect Deployment for flow 'Save from web to Cloud Storage to bigQuery'
+###
+name: etlX
+description: Orchestrates the flow of cycling data from web to BigQuery via Google
+  Cloud Storage
+version: 2cbd6624265f780e0464f8d413d8f4e7
+# The work queue that will handle this deployment's runs
+work_queue_name: default
+work_pool_name: null
+tags: []
+parameters: {}
+schedule: null
+is_schedule_active: null
+infra_overrides: {}
+infrastructure:
+  type: process
+  env: {}
+  labels: {}
+  name: null
+  command: null
+  stream_output: true
+  working_dir: null
+  block_type_slug: process
+  _block_type_slug: process
+
+###
+### DO NOT EDIT BELOW THIS LINE
+###
+flow_name: Save from web to Cloud Storage to bigQuery
+manifest_path: null
+storage: null
+path: /home/aminu/cycling_DE_project/prefect
+entrypoint: web_to_gcs_to_bq.py:web_to_gcs_to_bq
+parameter_openapi_schema:
+  title: Parameters
+  type: object
+  properties: {}
+  required: null
+  definitions: null
+timestamp: '2023-04-07T16:25:08.758814+00:00'

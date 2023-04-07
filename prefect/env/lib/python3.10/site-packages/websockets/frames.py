@@ -13,7 +13,7 @@ from .typing import Data
 
 try:
     from .speedups import apply_mask
-except ImportError:  # pragma: no cover
+except ImportError:
     from .utils import apply_mask
 
 
@@ -90,7 +90,11 @@ EXTERNAL_CLOSE_CODES = {
     1014,
 }
 
-OK_CLOSE_CODES = {1000, 1001}
+OK_CLOSE_CODES = {
+    1000,
+    1001,
+    1005,
+}
 
 
 BytesLike = bytes, bytearray, memoryview
@@ -123,7 +127,7 @@ class Frame:
 
     def __str__(self) -> str:
         """
-        Return a human-readable represention of a frame.
+        Return a human-readable representation of a frame.
 
         """
         coding = None
@@ -385,7 +389,7 @@ class Close:
 
     def __str__(self) -> str:
         """
-        Return a human-readable represention of a close code and reason.
+        Return a human-readable representation of a close code and reason.
 
         """
         if 3000 <= self.code < 4000:

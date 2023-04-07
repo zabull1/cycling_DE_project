@@ -44,6 +44,7 @@ from ..headers import (
 from ..http import USER_AGENT
 from ..typing import ExtensionHeader, LoggerLike, Origin, Subprotocol
 from ..uri import WebSocketURI, parse_uri
+from .compatibility import asyncio_timeout
 from .handshake import build_request, check_response
 from .http import read_response
 from .protocol import WebSocketCommonProtocol
@@ -65,7 +66,7 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
             await process(message)
 
     The iterator exits normally when the connection is closed with close code
-    1000 (OK) or 1001 (going away). It raises
+    1000 (OK) or 1001 (going away) or without a close code. It raises
     a :exc:`~websockets.exceptions.ConnectionClosedError` when the connection
     is closed with any other code.
 
@@ -130,7 +131,7 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
         after this coroutine returns.
 
         Raises:
-            InvalidMessage: if the HTTP message is malformed or isn't an
+            InvalidMessage: If the HTTP message is malformed or isn't an
                 HTTP/1.1 GET response.
 
         """
@@ -188,7 +189,6 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
         header_values = headers.get_all("Sec-WebSocket-Extensions")
 
         if header_values:
-
             if available_extensions is None:
                 raise InvalidHandshake("no extensions supported")
 
@@ -197,9 +197,7 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
             )
 
             for name, response_params in parsed_header_values:
-
                 for extension_factory in available_extensions:
-
                     # Skip non-matching extensions based on their name.
                     if extension_factory.name != name:
                         continue
@@ -245,7 +243,6 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
         header_values = headers.get_all("Sec-WebSocket-Protocol")
 
         if header_values:
-
             if available_subprotocols is None:
                 raise InvalidHandshake("no subprotocols supported")
 
@@ -277,15 +274,15 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
 
         Args:
             wsuri: URI of the WebSocket server.
-            origin: value of the ``Origin`` header.
-            available_extensions: list of supported extensions, in order in
-                which they should be tried.
-            available_subprotocols: list of supported subprotocols, in order
-                of decreasing preference.
-            extra_headers: arbitrary HTTP headers to add to the request.
+            origin: Value of the ``Origin`` header.
+            extensions: List of supported extensions, in order in which they
+                should be negotiated and run.
+            subprotocols: List of supported subprotocols, in order of decreasing
+                preference.
+            extra_headers: Arbitrary HTTP headers to add to the handshake request.
 
         Raises:
-            InvalidHandshake: if the handshake fails.
+            InvalidHandshake: If the handshake fails.
 
         """
         request_headers = Headers()
@@ -380,28 +377,26 @@ class Connect:
 
     Args:
         uri: URI of the WebSocket server.
-        create_protocol: factory for the :class:`asyncio.Protocol` managing
-            the connection; defaults to :class:`WebSocketClientProtocol`; may
-            be set to a wrapper or a subclass to customize connection handling.
-        logger: logger for this connection;
-            defaults to ``logging.getLogger("websockets.client")``;
-            see the :doc:`logging guide <../topics/logging>` for details.
-        compression: shortcut that enables the "permessage-deflate" extension
-            by default; may be set to :obj:`None` to disable compression;
-            see the :doc:`compression guide <../topics/compression>` for details.
-        origin: value of the ``Origin`` header. This is useful when connecting
-            to a server that validates the ``Origin`` header to defend against
-            Cross-Site WebSocket Hijacking attacks.
-        extensions: list of supported extensions, in order in which they
-            should be tried.
-        subprotocols: list of supported subprotocols, in order of decreasing
+        create_protocol: Factory for the :class:`asyncio.Protocol` managing
+            the connection. It defaults to :class:`WebSocketClientProtocol`.
+            Set it to a wrapper or a subclass to customize connection handling.
+        logger: Logger for this client.
+            It defaults to ``logging.getLogger("websockets.client")``.
+            See the :doc:`logging guide <../../topics/logging>` for details.
+        compression: The "permessage-deflate" extension is enabled by default.
+            Set ``compression`` to :obj:`None` to disable it. See the
+            :doc:`compression guide <../../topics/compression>` for details.
+        origin: Value of the ``Origin`` header, for servers that require it.
+        extensions: List of supported extensions, in order in which they
+            should be negotiated and run.
+        subprotocols: List of supported subprotocols, in order of decreasing
             preference.
-        extra_headers: arbitrary HTTP headers to add to the request.
-        user_agent_header: value of  the ``User-Agent`` request header;
-            defaults to ``"Python/x.y.z websockets/X.Y"``;
-            :obj:`None` removes the header.
-        open_timeout: timeout for opening the connection in seconds;
-            :obj:`None` to disable the timeout
+        extra_headers: Arbitrary HTTP headers to add to the handshake request.
+        user_agent_header: Value of  the ``User-Agent`` request header.
+            It defaults to ``"Python/x.y.z websockets/X.Y"``.
+            Setting it to :obj:`None` removes the header.
+        open_timeout: Timeout for opening the connection in seconds.
+            :obj:`None` disables the timeout.
 
     See :class:`~websockets.legacy.protocol.WebSocketCommonProtocol` for the
     documentation of ``ping_interval``, ``ping_timeout``, ``close_timeout``,
@@ -422,13 +417,11 @@ class Connect:
       the TCP connection. The host name from ``uri`` is still used in the TLS
       handshake for secure connections and in the ``Host`` header.
 
-    Returns:
-        WebSocketClientProtocol: WebSocket connection.
-
     Raises:
-        InvalidURI: if ``uri`` isn't a valid WebSocket URI.
-        InvalidHandshake: if the opening handshake fails.
-        ~asyncio.TimeoutError: if the opening handshake times out.
+        InvalidURI: If ``uri`` isn't a valid WebSocket URI.
+        OSError: If the TCP connection fails.
+        InvalidHandshake: If the opening handshake fails.
+        ~asyncio.TimeoutError: If the opening handshake times out.
 
     """
 
@@ -438,7 +431,7 @@ class Connect:
         self,
         uri: str,
         *,
-        create_protocol: Optional[Callable[[Any], WebSocketClientProtocol]] = None,
+        create_protocol: Optional[Callable[..., WebSocketClientProtocol]] = None,
         logger: Optional[LoggerLike] = None,
         compression: Optional[str] = "deflate",
         origin: Optional[Origin] = None,
@@ -539,6 +532,8 @@ class Connect:
             else:
                 # If sock is given, host and port shouldn't be specified.
                 host, port = None, None
+                if kwargs.get("ssl"):
+                    kwargs.setdefault("server_hostname", wsuri.host)
             # If host and port are given, override values from the URI.
             host = kwargs.pop("host", host)
             port = kwargs.pop("port", port)
@@ -656,7 +651,8 @@ class Connect:
         return self.__await_impl_timeout__().__await__()
 
     async def __await_impl_timeout__(self) -> WebSocketClientProtocol:
-        return await asyncio.wait_for(self.__await_impl__(), self.open_timeout)
+        async with asyncio_timeout(self.open_timeout):
+            return await self.__await_impl__()
 
     async def __await_impl__(self) -> WebSocketClientProtocol:
         for redirects in range(self.MAX_REDIRECTS_ALLOWED):
@@ -709,7 +705,7 @@ def unix_connect(
     It's mainly useful for debugging servers listening on Unix sockets.
 
     Args:
-        path: file system path to the Unix socket.
+        path: File system path to the Unix socket.
         uri: URI of the WebSocket server; the host is used in the TLS
             handshake for secure connections and in the ``Host`` header.
 
