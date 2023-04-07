@@ -138,7 +138,7 @@ def write_bq(df) -> None:
     gcp_credentials_block = GcpCredentials.load("gcs-credentials")
    
     df.to_gbq(
-            destination_table="cycling_data_all.test",
+            destination_table="cycling_data_all.cycling_table",
             project_id="balmy-component-381417",
             credentials=gcp_credentials_block.get_credentials_from_service_account(),
             chunksize=10000,
@@ -155,9 +155,9 @@ def web_to_gcs_to_bq() -> None:
     num = 20  #number of files in the directory
     url = f"https://cycling.data.tfl.gov.uk/usage-stats/cyclehireusagestats-{year}.zip"
     
-    # content = extract_from_web(url)
-    # unzipped_content = unzip_file(content)
-    # save_as_parquet(unzipped_content, year)
+    content = extract_from_web(url)
+    unzipped_content = unzip_file(content)
+    save_as_parquet(unzipped_content, year)
 
     for index in list(range(1,num+1)):
         storage_path = f'trips/parquet/{year}/journey_Data_Extract-{index:02}.parquet'
