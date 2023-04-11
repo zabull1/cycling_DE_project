@@ -142,7 +142,7 @@ def write_bq(df) -> None:
             project_id="balmy-component-381417",
             credentials=gcp_credentials_block.get_credentials_from_service_account(),
             chunksize=10000,
-            if_exists="append",
+            if_exists="append"
         )
 
     print("Succesfully uploaded data to BiqQuery")
