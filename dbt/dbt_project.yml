@@ -3,7 +3,7 @@
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
 name: 'cycling_DE_project'
-version: '1.0.0'
+version: '1.4.5'
 config-version: 2
 
 # This setting configures which "profile" dbt uses for this project.
@@ -34,4 +34,8 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   cycling_DE_project:
     # Applies to all files under models/example/
+     staging:
+      materialized: view
+     core:
+      materialized: table
   
