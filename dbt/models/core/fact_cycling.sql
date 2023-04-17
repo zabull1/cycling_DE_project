@@ -9,7 +9,7 @@ select * from cycling
 
 
 
--- dbt build --select dbt_mtg_latest_data.sql --var 'is_test_run: false'
+
 {% if var('is_test_run', default=true) %}
 
   limit 100
