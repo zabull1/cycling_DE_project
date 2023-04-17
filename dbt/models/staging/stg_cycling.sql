@@ -8,8 +8,8 @@ with cycling as (
 )
 
 select 
-    cast(Rental_id as integer) as Rental_id,
-    cast(Bike_id as integer) as Bike_id,
+    cast(Rental_id as string) as Rental_id,
+    cast(Bike_id as string) as Bike_id,
     cast(Start_Date as timestamp) as Start_Date,
     cast(StartStation_id as string) as StartStation_id,
     cast(StartStation_Name as string) as StartStation_Name,
