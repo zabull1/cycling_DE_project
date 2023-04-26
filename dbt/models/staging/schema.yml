@@ -1,0 +1,14 @@
+version: 2
+
+sources:
+      - name: staging
+        database: balmy-component-381417
+        schema: cycling_data_all
+
+        tables:
+            - name: cycling_table
+  
+
+models:
+      - name:  stg_cycling
+
