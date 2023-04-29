@@ -6,7 +6,7 @@ sources:
         schema: cycling_data_all
 
         tables:
-            - name: cycling_table
+            - name: external_cycling_data_partitioned_clustered
   
 
 models:

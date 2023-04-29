@@ -9,7 +9,10 @@ from random import randint
 from prefect import task, flow
 from prefect_gcp import GcpCredentials
 from prefect_gcp.cloud_storage import GcsBucket
+from prefect_gcp.bigquery import BigQueryWarehouse
+from prefect_dbt.cli.commands import DbtCoreOperation
 from chardet.universaldetector import UniversalDetector
+
 
 @task(log_prints=True, name="Read cycling data", retries=3)
 def extract_from_web(url: str) -> bytes:
@@ -36,7 +39,7 @@ def unzip_file(content: bytes, retries=3)-> list:
     print("Successfully unzip data.")
     return unzipped_files    
 
-        
+
 
 @task(log_prints=True, name= "save cycling data to Google Cloud Storage in parquet format", retries=3)
 def save_as_parquet(unzipped_files: list, year: str) -> None:
@@ -46,7 +49,7 @@ def save_as_parquet(unzipped_files: list, year: str) -> None:
     
     for index , content in enumerate(unzipped_files, start=1):
 
-        storage_path_parquet = f'trips/parquet_/{year}/journey_Data_Extract_{year}-{index:02}.parquet'
+        storage_path_parquet = f'trips/parquet/{year}/journey_Data_Extract_{year}-{index:02}.parquet'
        
         #decode content encoding
         detector = UniversalDetector()
@@ -58,8 +61,46 @@ def save_as_parquet(unzipped_files: list, year: str) -> None:
 
         df = pd.read_csv(BytesIO(content[1]), encoding=encoding)
 
-        df =df.astype(str)
-        
+        df['Rental Id']= df['Rental Id'].astype("string")
+        df['Bike Id']= df['Bike Id'].astype("string")
+        df['End Date'] = pd.to_datetime(df['End Date'])
+        df['EndStation Id']= df['EndStation Id'].astype("string")
+        df['EndStation Name']= df['EndStation Name'].astype("string")
+        df['Start Date'] = pd.to_datetime(df['Start Date'])
+        df['StartStation Id']= df['StartStation Id'].astype("string")
+        df['StartStation Name']= df['StartStation Name'].astype("string") 
+        df['Duration']= df['Duration'].astype("float")
+
+        df['Duration'].fillna(0)
+    
+
+        df = df.rename(columns={ 
+                    'Rental Id': 'rental_id',
+                    'Bike Id': 'bike_id',
+                    'End Date': 'end_date',
+                    'Start Date': 'start_date',
+                    'EndStation Id': 'endstation_id',
+                    'EndStation Name': 'endstation_name',
+                    'StartStation Id': 'startstation_id',
+                    'StartStation Name': 'startstation_name',
+                    'Duration': 'duration'
+                    })
+
+        df = df[
+            [
+            'rental_id',
+            'bike_id',
+            'end_date',
+            'start_date',
+            'endstation_id',
+            'endstation_name',
+            'startstation_id',
+            'startstation_name',
+            'duration'
+            ] 
+        ]            
+
+            
         buffer = BytesIO()
         df.to_parquet(buffer, engine='auto', compression='snappy')
         buffer.seek(0)
@@ -68,104 +109,71 @@ def save_as_parquet(unzipped_files: list, year: str) -> None:
         print(f"Successfully save {storage_path_parquet} to Google Cloud Storage.")
 
 
-@task(log_prints=True, name= "Get parquet from Google Cloud Storage", retries=3)
-def get_dataframe(storage_path: str) -> pd.DataFrame:
-    """Gets the parquet file from GCS and converts it to a dataframe"""
-    gcs = GcsBucket.load('gcs-bucket')
-    temp_file = BytesIO()
-    gcs.download_object_to_file_object(
-        from_path=storage_path, 
-        to_file_object=temp_file
+
+
+@task(name="Stage GCS to BQ")
+def stage_bq():
+    """Stage data in BigQuery"""
+
+    bq_ext_tbl = f"""
+            CREATE OR REPLACE EXTERNAL TABLE `balmy-component-381417.cycling_data_all.external_cycling_data`
+            OPTIONS (
+                format = 'PARQUET',
+                uris = ['gs://dtc_data_lake_balmy-component-381417/trips/parquet/2014/journey_*.parquet']
+            )
+        """
+
+    with BigQueryWarehouse.load("bq-block") as warehouse:
+        operation = bq_ext_tbl
+        warehouse.execute(operation)
+
+    bq_part_tbl = f"""
+            CREATE OR REPLACE TABLE `balmy-component-381417.cycling_data_all.external_cycling_data_partitioned_clustered`
+            PARTITION BY DATE(start_date)
+            CLUSTER BY startstation_id, endstation_name AS (
+            SELECT * FROM `balmy-component-381417.cycling_data_all.external_cycling_data`);
+        """
+
+    with BigQueryWarehouse.load("bq-block") as warehouse:
+        operation = bq_part_tbl
+        warehouse.execute(operation)
+
+@task(name="dbt modelling")
+def dbt_model():
+    """Run dbt models"""
+
+    dbt_path = Path(f"../dbt/")
+
+    dbt_run = DbtCoreOperation(
+                    commands=["dbt deps", 
+                              "dbt seed -t prod", 
+                              "dbt build -t prod"],
+                    project_dir=dbt_path,
+                    profiles_dir=dbt_path,
     )
 
-    temp_file.seek(0)
-    df = pd.read_parquet((temp_file))
-  
-    return df  
+    dbt_run.run()
 
-@task(log_prints =True, name= "enforce column names and datatypes")
-def transform(df) -> pd.DataFrame:
-    """Data cleaning: enforcing column names and datatypes"""
-
-    df['Rental Id']= df['Rental Id'].astype("string")
-    df['Bike Id']= df['Bike Id'].astype("string")
-    df['End Date'] = pd.to_datetime(df['End Date'])
-    df['EndStation Id']= df['EndStation Id'].astype("string")
-    df['EndStation Name']= df['EndStation Name'].astype("string")
-    df['Start Date'] = pd.to_datetime(df['Start Date'])
-    df['StartStation Id']= df['StartStation Id'].astype("string")
-    df['StartStation Name']= df['StartStation Name'].astype("string") 
-    df['Duration']= df['Duration'].astype("float")
-
-    df['Duration'].fillna(0)
-   
-
-    df = df.rename(columns={ 
-                'Rental Id': 'Rental_Id',
-                'Bike Id': 'Bike_Id',
-                'End Date': 'End_Date',
-                'Start Date': 'Start_Date',
-                'EndStation Id': 'EndStation_Id',
-                'EndStation Name': 'EndStation_Name',
-                'StartStation Id': 'StartStation_Id',
-                'StartStation Name': 'StartStation_Name',
-                })
-
-    df = df[
-        [
-        'Rental_Id',
-        'Bike_Id',
-        'End_Date',
-        'Start_Date',
-        'EndStation_Id',
-        'EndStation_Name',
-        'StartStation_Id',
-        'StartStation_Name',
-        'Duration'
-        ] 
-    ]            
-
-    print("Successfully enforced column names and data types.")
-    return df
-
-
-
-
-@task(log_prints=True, name="Write to BigQuery")
-def write_bq(df) -> None:
-    """Write DataFrame to BiqQuery"""
-
-    gcp_credentials_block = GcpCredentials.load("gcs-credentials")
-   
-    df.to_gbq(
-            destination_table="cycling_data_all.cycling_table",
-            project_id="balmy-component-381417",
-            credentials=gcp_credentials_block.get_credentials_from_service_account(),
-            chunksize=10000,
-            if_exists="append"
-        )
-
-    print("Succesfully uploaded data to BiqQuery")
+    return
 
 
 @flow(name='Save from web to Cloud Storage to bigQuery')
-def web_to_gcs_to_bq() -> None:
+def web_to_gcs_to_bq(year : int) -> None:
     """Orchestrates the flow of cycling data from web to BigQuery via Google Cloud Storage"""
-    year = 2014
-    num = 20  #number of files in the directory
+
     url = f"https://cycling.data.tfl.gov.uk/usage-stats/cyclehireusagestats-{year}.zip"
     
     content = extract_from_web(url)
     unzipped_content = unzip_file(content)
     save_as_parquet(unzipped_content, year)
 
-    for index in list(range(1,num+1)):
-        storage_path = f'trips/parquet/{year}/journey_Data_Extract-{index:02}.parquet'
-        df = get_dataframe(storage_path)
-        transformed_df = transform(df)
-        write_bq(transformed_df)
+
+    stage_bq()
+
+    dbt_model()
 
     print("Succesfully orchestrated cycling data from web to BiqQuery  via Google Cloud Storage")
 
 if __name__ == "__main__":
- web_to_gcs_to_bq()
+ year = 2014
+ web_to_gcs_to_bq(year)
