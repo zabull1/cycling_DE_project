@@ -10,7 +10,7 @@ In this tutorial, we will walk through the process of reproducing the Transport 
 
 1. Please see GCP Setup  if you need to set up a GCP Environment, including a VM, GCP account with the service account and project.
 2. Clone on your VM, `git clone https://github.com/zabull1/cycling_DE_project.git`
-3. Change the directory to the repo folder using `cd`
+3. Change to the directory to the repo folder using `cd`
 4. To install Google Cloud CLI, Terraform and Anaconda run `bash ./setup/setup.sh` 
 5. Setup virtual environment by running the below commands5	- source ~/.bashrc
 	- conda create -n mpls311 python=3.9 -y
