@@ -1,10 +1,10 @@
 ## Introduction:
-In this tutorial, we will walk through the process of reproducing the Transport for London (TFL) cycling data engineering project. This project involves extracting cycling data from the TFL website (https://cycling.data.tfl.gov.uk), transforming and cleaning it, and loading it into Google Cloud Storage and BigQuery. Later, we used dbt to transform the data in Big Query. This project
+In this tutorial, we will walk through the process of reproducing the Transport for London (TFL) cycling data engineering project. This project involves extracting cycling data from the TFL website (https://cycling.data.tfl.gov.uk), transforming and cleaning it, and loading it into Google Cloud Storage and BigQuery. Later, we used dbt to transform the data in Big Query.
 
 ## Prerequisites:
-Basic knowledge of Python programming
-Familiarity with data engineering concepts
-Access to a Google Cloud Platform (GCP) account
+- Basic knowledge of Python programming
+- Familiarity with data engineering concepts
+- Access to a Google Cloud Platform (GCP) account
 
 ## Step 1: Setup
 
