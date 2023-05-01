@@ -16,6 +16,8 @@ wget https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
 # User will need to page down or hit f to get past the MORE prompt
 echo -ne "ENTER \n yes \n \n yes \n" | bash Anaconda3-2022.10-Linux-x86_64.sh
 rm Anaconda3-2022.10-Linux-x86_64.sh
+sudo apt install python3-venv
+
 
 # terraform
 wget https://releases.hashicorp.com/terraform/1.4.2/terraform_1.4.2_linux_amd64.zip
