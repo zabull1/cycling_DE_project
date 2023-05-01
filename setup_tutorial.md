@@ -101,8 +101,7 @@ In this section, we cover how to setup our GCP environment.
     8. Move the google_credentials.json file to the directory above
         
         or you can create a new file in $HOME/.google/credentials/ with the name google_credentials.json
-        
-	 - `cd .google/credentials`
+	- `cd .google/credentials`
         - `touch google_credentials.json`
         -  `nano google_credentials.json` and then copy the content of google_credentials.json from download and paste in the newly created json file
         -  `control O` to save the file
