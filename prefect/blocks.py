@@ -1,4 +1,4 @@
-from prefect_gcp import GcpCredentials
+from prefect_gcp import GcpCredentials, BigQueryWarehouse
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect_dbt.cli import BigQueryTargetConfigs, DbtCliProfile, DbtCoreOperation
 
@@ -25,9 +25,8 @@ bucket_block.save("gcs-bucket", overwrite=True)
 gcp_credentials = GcpCredentials.load("gcs-credentials")
 
 # Creating BQ Bucket Block
-bq_block =config("bq-block")
 
-BigQueryWarehouse(gcp_credentials=gcp_credentials).save(bq_block, overwrite=True)
+BigQueryWarehouse(gcp_credentials=gcp_credentials).save("bq-block", overwrite=True)
 
 credentials = GcpCredentials.load("gcs-credentials")
 target_configs = BigQueryTargetConfigs(
