@@ -31,6 +31,12 @@ In this tutorial, we will walk through the process of reproducing the Transport 
     
     - update the variable.tf file
     	- update the project ID to your chosen ID
+    	- update the region to your chosen region
+    		- `nano variables.tf`
+    		- make changes
+    		- `control O`
+    		- press the Enter key
+    		- `control X` to exit
     	   
     - Initialize 
       ```bash
