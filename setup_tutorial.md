@@ -107,27 +107,21 @@ Host gcpvm
         -  `Enter` to confirm
         -  `control X` to close the file
 
-4. To install Google Cloud CLI, Terraform and Anaconda run `bash ./setup.sh`
 
-	- (Note) This may take a little time to process and if you see any prompts from updates, you can hit OK on the prompts and f for the MORE prompt 	   for the Anaconda setup
-	- After installation, run the following command to see if you installed GCP SDK correctly:
-        ```bash
-        gcloud -v
-        ``` 
-        - Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the path of the json file. Use the command bellow:
-        ``` bash
+     9. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the path of the json file. Use the command below:
+       ``` bash
         export GOOGLE_APPLICATION_CREDENTIALS="~/.google/credentials/google_credentials.json"
-        ```
+       ```
 	 (export GOOGLE_APPLICATION_CREDENTIALS="<absolute path to the json file in the ./creds folder>" to set environment variable for your service account file.)
 	 
-    - Run the command below 
+    10. Run the command below 
      ```bash
             gcloud auth application-default login
       ```
     - above command will make you sign into your google account and verify the authentication. If all goes well your a google browser will open with the following message displayed: **You are now authenticated with the gcloud CLI!**
           
-       - Notes(explanation):
-       - In above(export GOOGLE_APP....), We're telling Google Cloud SDK and API client libraries to use the JSON file specified by the path as the    default location for authentication credentials. This means that we can access Google Cloud Platform services without having to explicitly provide authentication keys in our code. Thus, that's what allows us to automatically sign in into our google account wth the command in step 12. 
+   - Notes(explanation):
+      - In above(export GOOGLE_APP....), We're telling Google Cloud SDK and API client libraries to use the JSON file specified by the path as the    default location for authentication credentials. This means that we can access Google Cloud Platform services without having to explicitly provide authentication keys in our code. Thus, that's what allows us to automatically sign in into our google account wth the command in step 12. 
        - We changed the name and location of our credentials file for future purpose but ideally we could ran the export command from step 11 when our credential file was located in the downloads folder with its default name. We just had to provide the correct path. 
 
 - **Add additional Roles and permission (i.e services)**
