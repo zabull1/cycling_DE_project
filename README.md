@@ -47,7 +47,7 @@ This project aims to build an end-to-end orchestrated data pipeline. The pipelin
 
 ## How to make it work?
 
-Please check the [tutotial](tutorial.md)
+Please check the [tutotial](Tutorial.md)
 
 ## Dashboard example
 [Click here](https://lookerstudio.google.com/u/3/reporting/fbadcee0-64bf-4771-8187-960e6ad0f0fa/page/6g7MD) to see my Looker dashboard.
