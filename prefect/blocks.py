@@ -9,7 +9,7 @@ from prefect_dbt.cli import BigQueryTargetConfigs, DbtCliProfile, DbtCoreOperati
 
 
 credentials_block = GcpCredentials(
-    service_account_info={}  enter your credentials info here
+    service_account_info={}
 )
 
 credentials_block.save("gcs-credentials", overwrite=True)
