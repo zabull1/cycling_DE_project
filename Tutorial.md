@@ -11,8 +11,8 @@ In this tutorial, we will walk through the process of reproducing the Transport 
 ## Step 1: Setup
 
 1. Please see [Setup](/setup_tutorial.md)  if you need to set up a GCP Environment, including a VM, GCP account with the service account and project. 
-2. Clone on your VM, `git clone https://github.com/zabull1/cycling_DE_project.git`
-3. Change to the directory to the repo folder using `cd`
+2. Clone on your VM, ```git clone https://github.com/zabull1/cycling_DE_project.git```
+3. Change the directory to the repo folder using `cd`
 4. 4. To install Google Cloud CLI, Terraform and Anaconda run `bash ./setup.sh`
 
 	- (Note) This may take a little time to process and if you see any prompts from updates, you can hit OK on the prompts and f for the MORE prompt 	   for the Anaconda setup
@@ -26,6 +26,12 @@ In this tutorial, we will walk through the process of reproducing the Transport 
 	- `pip install -r ./requirements.txt`
 
 6. Execute Terraform code
+    - Change the directory to terraform folder containing the terraform configuration filester
+      `cd terraform`
+    
+    - update the variable.tf file
+    	- update the project ID
+    	   
     - Initialize 
       ```bash
       terraform init
@@ -38,10 +44,5 @@ In this tutorial, we will walk through the process of reproducing the Transport 
       ```bash
       terraform apply
       ```
-    
-    
-    - Once you are done with this project, and if you want to discard the infrastructure you created with terraform run the command below:
-     ```bash
-     terraform destroy
-     ```
+   
 7. 
