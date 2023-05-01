@@ -41,6 +41,8 @@ In this section, we cover how to setup our GCP environment.
 		- (ssh-keygen -t rsa -f ~/.ssh/KEY_FILENAME -C USERNAME -b 2048)
 
 		- This will generate an 2048 bit rsa ssh keypair, named `cycling_vm` and a comment of `cycling`.  The comment will end up being the user 		on your VM.
+	
+	- `cd .ssh` to change directory to ssh folder
 
 	- Do a `cat cycling_vm.pub` to see the contents of the public key, and copy the contents.
 
