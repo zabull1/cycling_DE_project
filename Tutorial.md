@@ -21,7 +21,7 @@ In this tutorial, we will walk through the process of reproducing the Transport 
         gcloud -v
         ``` 
 5. Setup virtual environment by running the below commands	
-	- `python -m venv env`
+	- `python3 -m venv env` or `python -m venv env`
 	- `source env/bin/activate`
 	- `pip install -r ./requirements.txt`
 
