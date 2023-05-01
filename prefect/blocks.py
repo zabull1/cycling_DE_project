@@ -22,13 +22,19 @@ bucket_block = GcsBucket(
 
 bucket_block.save("gcs-bucket", overwrite=True)
 
+gcp_credentials = GcpCredentials.load("gcs-credentials")
+
+# Creating BQ Bucket Block
+bq_block =config("bq-block")
+
+BigQueryWarehouse(gcp_credentials=gcp_credentials).save(bq_block, overwrite=True)
 
 credentials = GcpCredentials.load("gcs-credentials")
 target_configs = BigQueryTargetConfigs(
     schema="cycling_data_all", 
     credentials=credentials,
 )
-target_configs.save("bq-block", overwrite=True)
+target_configs.save("bq-block-dbt", overwrite=True)
 
 dbt_cli_profile = DbtCliProfile(
     name="cycling-dbt-cli-profile",
