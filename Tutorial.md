@@ -30,7 +30,7 @@ In this tutorial, we will walk through the process of reproducing the Transport 
       `cd terraform`
     
     - update the variable.tf file
-    	- update the project ID
+    	- update the project ID to your chosen ID
     	   
     - Initialize 
       ```bash
