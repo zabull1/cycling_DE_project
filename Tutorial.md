@@ -8,7 +8,7 @@ In this tutorial, we will walk through the process of reproducing the Transport 
 - Familiarity with data engineering concepts
 - Access to a Google Cloud Platform (GCP) account
 
-## Step 1: Setup
+## Setup
 
 1. Please see [Setup](/setup_tutorial.md)  if you need to set up a GCP Environment, including a VM, GCP account with the service account and project. 
 2. Clone on your VM, ```git clone https://github.com/zabull1/cycling_DE_project.git```
@@ -51,4 +51,24 @@ In this tutorial, we will walk through the process of reproducing the Transport 
       terraform apply
       ```
    
-7. 
+7. Setup your orchestration
+	- sign-up for the prefect cloud and create a workspace [here](https://app.prefect.cloud/auth/login)
+	-  Generate a new API key (if you dont have any) and keep it safe 
+		- click the icon at the bottom left corner
+		- click on the profile (your name)
+		- click on API Keys
+		- click on Create API Key
+		- enter API key name and click on Create
+		- copy the API key and keep it safe
+	- change the directory to prefect folder using `cd`
+	- Log in to the Prefect Cloud dashboard		
+		- `prefect cloud login -k [api_key]`
+	- Edit blocks.py by inserting the service account credentials
+	- Create the prefect blocks
+		- `python blocks.py` or  via the cloud UI [prefect blocks](https://docs.prefect.io/concepts/blocks/)
+	- Deploy the pipeline
+		- `python deploy_web_to_gcs_to_bq.py`
+		- in Cloud UI, goto Deployment and a start a quick run
+		- in terminal, run below command
+			- `prefect agent start --pool default-agent-pool`
+	
