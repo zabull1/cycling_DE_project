@@ -44,4 +44,4 @@ In this tutorial, we will walk through the process of reproducing the Transport 
      ```bash
      terraform destroy
      ```
-  <font color="red">**Note this will permanently delete the GCP infrastructure we created with Terraform - use with cation**</font>
+7. 
