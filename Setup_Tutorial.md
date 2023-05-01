@@ -43,11 +43,7 @@ In this tutorial, we will walk through the process of reproducing the Transport 
 
   - Notes:
     - In Google Cloud Platform (GCP), the Identity and Access Management (IAM) API and the IAM Credentials API are used to manage and control access to GCP resources.
-
     - The IAM API provides the ability to manage access control policies for GCP resources such as projects, buckets, and instances. It enables you to create and manage IAM roles, which define a set of permissions for specific actions on resources, and grant those roles to members or groups.
-   
     - The IAM Credentials API is used to create, manage, and exchange temporary credentials such as access tokens, identity tokens, and service account keys. These temporary credentials can be used to authenticate requests to GCP APIs and services.
-   
     - Enabling the IAM API and the IAM Credentials API is required in order to use and manage IAM roles and policies, as well as to create and manage temporary credentials.
-    
     - These APIs are required for Terraform
