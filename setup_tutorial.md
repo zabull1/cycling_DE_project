@@ -31,7 +31,7 @@ In this section, we cover how to setup our GCP environment.
   
  - **Generate SSH key**
 
-	[Henerate SSH key](https://cloud.google.com/compute/docs/connect/create-ssh-keys)
+	[Generate SSH key](https://cloud.google.com/compute/docs/connect/create-ssh-keys)
 
 	- We need to generate an ssh key, which we'll upload to our Google Cloud project and this will be used for ssh'ing into a VM
 
