@@ -6,7 +6,7 @@ default:
       method: service-account
       dataset: cycling_dev
       threads: 4
-      keyfile: "/home/aminu/.google/credentials/google_credentials.json"
+      keyfile: "~/.google/credentials/google_credentials.json"
       timeout_seconds: 300
       location: europe-west6
       priority: interactive
@@ -15,7 +15,7 @@ default:
       method: service-account
       dataset: cycling_prod
       threads: 4
-      keyfile: "/home/aminu/.google/credentials/google_credentials.json"
+      keyfile: "~/.google/credentials/google_credentials.json"
       timeout_seconds: 300
       location: europe-west6
       priority: interactive
