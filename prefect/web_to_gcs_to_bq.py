@@ -13,6 +13,8 @@ from prefect_gcp.bigquery import BigQueryWarehouse
 from prefect_dbt.cli.commands import DbtCoreOperation
 from chardet.universaldetector import UniversalDetector
 
+project_name = ""
+bucket_name = ""
 
 @task(log_prints=True, name="Read cycling data", retries=3)
 def extract_from_web(url: str) -> bytes:
@@ -116,10 +118,10 @@ def stage_bq():
     """Stage data in BigQuery"""
 
     bq_ext_tbl = f"""
-            CREATE OR REPLACE EXTERNAL TABLE `balmy-component-381417.cycling_data_all.external_cycling_data`
+            CREATE OR REPLACE EXTERNAL TABLE `{project_name}.cycling_data_all.external_cycling_data`
             OPTIONS (
                 format = 'PARQUET',
-                uris = ['gs://dtc_data_lake_balmy-component-381417/trips/parquet/2014/journey_*.parquet']
+                uris = ['gs://{bucket_name}/trips/parquet/2014/journey_*.parquet']
             )
         """
 
@@ -128,10 +130,10 @@ def stage_bq():
         warehouse.execute(operation)
 
     bq_part_tbl = f"""
-            CREATE OR REPLACE TABLE `balmy-component-381417.cycling_data_all.external_cycling_data_partitioned_clustered`
+            CREATE OR REPLACE TABLE `{project_name}.cycling_data_all.external_cycling_data_partitioned_clustered`
             PARTITION BY DATE(start_date)
             CLUSTER BY startstation_id, endstation_name AS (
-            SELECT * FROM `balmy-component-381417.cycling_data_all.external_cycling_data`);
+            SELECT * FROM `{project_name}.cycling_data_all.external_cycling_data`);
         """
 
     with BigQueryWarehouse.load("bq-block") as warehouse:
