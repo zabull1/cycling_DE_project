@@ -17,7 +17,7 @@ credentials_block.save("gcs-credentials", overwrite=True)
 
 bucket_block = GcsBucket(
     gcp_credentials=GcpCredentials.load("gcs-credentials"),
-    bucket= "gcs-bucket",
+    bucket= "dtc_data_lake_cycling-385411",
 )
 
 bucket_block.save("gcs-bucket", overwrite=True)
