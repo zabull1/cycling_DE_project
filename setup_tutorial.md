@@ -61,6 +61,7 @@ Click the `Create Instance` action towards the top.  On the next screen, you'll 
     * Boot Disk section, change the following settings:
         * Select Ubuntu and Ubuntu 20.04 LTS (x86/64) as the Operating System and Version
         * Size = 20 GB should be plenty for this project.
+    * Under Identity and API access, choose the new service account you just created , if no service account is chosen, it will use the compute engine default service account and all permissions will need to be granded( storage admin, storage object admin and bigquery admin ) as we will see below
 
 Hit Create.  Once the VM is finished getting created, note the external IP address. (if you cant see the externel ip, click the triple dots and select view network details)
 
