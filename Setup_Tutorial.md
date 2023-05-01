@@ -22,8 +22,9 @@ In this tutorial, we will walk through the process of reproducing the Transport 
         ``` bash
         export GOOGLE_APPLICATION_CREDENTIALS="~/.google/credentials/google_credentials.json"
         ```
-	 (run export GOOGLE_APPLICATION_CREDENTIALS="<absolute path to the json file in the ./creds folder>" to set environment variable for your service account file.)
-        - Run the command bellow - it will make you sign into your google account and verify the authentication. If all goes well your a google browser will open with the following message displayed: **You are now authenticated with the gcloud CLI!**
+	 (export GOOGLE_APPLICATION_CREDENTIALS="<absolute path to the json file in the ./creds folder>" to set environment variable for your service account file.)
+	 
+    - Run the command bellow - it will make you sign into your google account and verify the authentication. If all goes well your a google browser will open with the following message displayed: **You are now authenticated with the gcloud CLI!**
             ```bash
             gcloud auth application-default login
             ```
