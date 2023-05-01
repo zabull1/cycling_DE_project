@@ -24,11 +24,13 @@ In this tutorial, we will walk through the process of reproducing the Transport 
         ```
 	 (export GOOGLE_APPLICATION_CREDENTIALS="<absolute path to the json file in the ./creds folder>" to set environment variable for your service account file.)
 	 
-    - Run the command bellow - it will make you sign into your google account and verify the authentication. If all goes well your a google browser will open with the following message displayed: **You are now authenticated with the gcloud CLI!**
-            ```bash
+    - Run the command below 
+     ```bash
             gcloud auth application-default login
-            ```
-       - Notes:
+      ```
+    - above command will make you sign into your google account and verify the authentication. If all goes well your a google browser will open with the following message displayed: **You are now authenticated with the gcloud CLI!**
+          
+       - Notes(explanation):
        - In above(export GOOGLE_APP....), We're telling Google Cloud SDK and API client libraries to use the JSON file specified by the path as the    default location for authentication credentials. This means that we can access Google Cloud Platform services without having to explicitly provide authentication keys in our code. Thus, that's what allows us to automatically sign in into our google account wth the command in step 12. 
        - We changed the name and location of our credentials file for future purpose but ideally we could ran the export command from step 11 when our credential file was located in the downloads folder with its default name. We just had to provide the correct path. 
 
