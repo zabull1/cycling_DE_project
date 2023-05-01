@@ -33,51 +33,51 @@ In this section, we cover how to setup our GCP environment.
 
 [Reference link](https://cloud.google.com/compute/docs/connect/create-ssh-keys)
 
-We need to generate an ssh key, which we'll upload to our Google Cloud project and this will be used for ssh'ing into a VM
+	- We need to generate an ssh key, which we'll upload to our Google Cloud project and this will be used for ssh'ing into a VM
 
-On your local computer, open your terminal and run the below command:
-`ssh-keygen -t rsa -f ~/.ssh/cycling_vm -C cycling -b 2048`
+	- On your local computer, open your terminal and run the below command:
+		- `ssh-keygen -t rsa -f ~/.ssh/cycling_vm -C cycling -b 2048`
 
-ssh-keygen -t rsa -f ~/.ssh/KEY_FILENAME -C USERNAME -b 2048
+		- (ssh-keygen -t rsa -f ~/.ssh/KEY_FILENAME -C USERNAME -b 2048)
 
-This will generate an 2048 bit rsa ssh keypair, named `cycling_vm` and a comment of `cycling`.  The comment will end up being the user on your VM.
+		- This will generate an 2048 bit rsa ssh keypair, named `cycling_vm` and a comment of `cycling`.  The comment will end up being the user 		on your VM.
 
-Do a `cat cycling_vm.pub` to see the contents of the public key, and copy the contents.
+	- Do a `cat cycling_vm.pub` to see the contents of the public key, and copy the contents.
 
-Back in Google Cloud Console, navigate to Compute Engine > Metadata.
+	- Back in Google Cloud Console, navigate to Compute Engine > Metadata.
 
-On the SSH keys tab, you can click Add SSH key and paste in the contents you copied, and hit save.
+	- On the SSH keys tab, you can click Add SSH key and paste in the contents you copied, and hit save.
 
     
   - **Create a VM**
 
-In Google Cloud Console, navigate to Compute Engine > VM instances.  You may have to activate the APi for the Compute Engine when you first come here.
+	- In Google Cloud Console, navigate to Compute Engine > VM instances.  You may have to activate the APi for the Compute Engine when you first 		come here.
 
-Click the `Create Instance` action towards the top.  On the next screen, you'll want to set the following information:
+	- Click the `Create Instance` action towards the top.  On the next screen, you'll want to set the following information:
 
-    * Name = whatever name you would like to call this VM
-    * Region, Zone = select a region near you, same with Zone
-    * Machine Type = Standard, 4vCPu, 16 GB Memory (e2-standard-4)
-    * Boot Disk section, change the following settings:
-        * Select Ubuntu and Ubuntu 20.04 LTS (x86/64) as the Operating System and Version
-        * Size = 20 GB should be plenty for this project.
-    * Under Identity and API access, choose the new service account you just created , if no service account is chosen, it will use the compute engine default service account and all permissions will need to be granded( storage admin, storage object admin and bigquery admin ) as we will see below
+    		* Name = whatever name you would like to call this VM
+    		* Region, Zone = select a region near you, same with Zone
+    		* Machine Type = Standard, 4vCPu, 16 GB Memory (e2-standard-4)
+    		* Boot Disk section, change the following settings:
+        		* Select Ubuntu and Ubuntu 20.04 LTS (x86/64) as the Operating System and Version
+        		* Size = 20 GB should be plenty for this project.
+    		* Under Identity and API access, choose the new service account you just created , if no service account is chosen, it will use the 			compute engine default service account and all permissions will need to be granded( storage admin, storage object admin and bigquery 			admin ) as we will see below
 
-Hit Create.  Once the VM is finished getting created, note the external IP address. (if you cant see the externel ip, click the triple dots and select view network details)
+	- Hit Create.  Once the VM is finished getting created, note the external IP address. (if you cant see the externel ip, click the triple dots 		and select view network details)
 
-In your terminal window, you should now be able to ssh into the VM via the command below, inputing the external IP address of your VM
-`ssh -i ~/.ssh/cycling_vm cycling@[external-ip-address]`
+	- In your terminal window, you should now be able to ssh into the VM via the command below, inputing the external IP address of your VM
+	`ssh -i ~/.ssh/cycling_vm cycling@[external-ip-address]`
 
-You can also update or create a `config` file in your `~/.ssh` folder with the block below, inputing the external IP address of your VM.  This will allow you to just do `ssh gcpvm` to login to your VM
+	- You can also update or create a `config` file in your `~/.ssh` folder with the block below, inputing the external IP address of your VM.  This 	will allow you to just do `ssh gcpvm` to login to your VM
 
-```
-Host gcpvm
-    Hostname [external IP address]
-    User cycling
-    IdentityFile ~/.ssh/cycling_vm
-```
+	```
+	Host gcpvm
+    		Hostname [external IP address]
+    		User cycling
+    		IdentityFile ~/.ssh/cycling_vm
+	```
 
-> **Important note: When you're not using your VM, make sure to stop it in your VM Instances screen in Google Cloud Console.  This way it's not up and running, and using up your credits.**
+	> **Important note: When you're not using your VM, make sure to stop it in your VM Instances screen in Google Cloud Console.  This way it's not 	up and running, and using up your credits.**
 
 
 - **Authenticate local environment to cloud**
