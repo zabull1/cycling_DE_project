@@ -1,32 +1,38 @@
 from prefect_gcp import GcpCredentials
 from prefect_gcp.cloud_storage import GcsBucket
+from prefect_dbt.cli import BigQueryTargetConfigs, DbtCliProfile, DbtCoreOperation
+
+# This is an alternative to creating GCP blocks in the UI
+
+# Insert your own service_account_file path or service_account_info dictionary from the json file
+# IMPORTANT - do not store credentials in a publicly available repository!
 
 
-# replace this PLACEHOLDER dict with your own service account info
-service_account_info = {
-  "type": "service_account",
-  "project_id": "PROJECT_ID",
-  "private_key_id": "KEY_ID",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nPRIVATE_KEY\n-----END PRIVATE KEY-----\n",
-  "client_email": "SERVICE_ACCOUNT_EMAIL",
-  "client_id": "CLIENT_ID",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://accounts.google.com/o/oauth2/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/SERVICE_ACCOUNT_EMAIL"
-}
+credentials_block = GcpCredentials(
+    service_account_info={}  enter your credentials info here
+)
 
-GcpCredentials(
-    service_account_info=service_account_info
-).save("BLOCK-NAME-PLACEHOLDER")
+credentials_block.save("gcs-credentials", overwrite=True)
 
 
+bucket_block = GcsBucket(
+    gcp_credentials=GcpCredentials.load("gcs-credentials"),
+    bucket= "gcs-bucket",
+)
 
-gcp_credentials = GcpCredentials.load("BLOCK-NAME-PLACEHOLDER")
+bucket_block.save("gcs-bucket", overwrite=True)
 
-gcs_bucket = GcsBucket(
-        bucket="BUCKET-NAME-PLACEHOLDER",
-        gcp_credentials=gcp_credentials
-    )
 
-bucket_block.save("BUCKET-NAME-PLACEHOLDER")
+credentials = GcpCredentials.load("gcs-credentials")
+target_configs = BigQueryTargetConfigs(
+    schema="cycling_data_all", 
+    credentials=credentials,
+)
+target_configs.save("bq-block", overwrite=True)
+
+dbt_cli_profile = DbtCliProfile(
+    name="cycling-dbt-cli-profile",
+    target="dev",
+    target_configs=target_configs,
+)
+dbt_cli_profile.save("cycling-dbt-cli-profile", overwrite=True)
