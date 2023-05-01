@@ -94,10 +94,7 @@ In this section, we cover how to setup our GCP environment.
     4. Then click Manage keys, Add key, Create new key. Select JSON option and click Create.
     5. Go to your download folder and find the json file. 
     6. Rename the json file to google_credentials.json
-        ```bash
-          mv ~/Downloads/<xxxxxx.json> ~/Downloads/google_credentials.json
-        ```
-    7. Create the following path .google/credentials/ in your HOME directory. You can use the command below in a terminal.
+    7. Create the following path .google/credentials/ in your VM HOME directory. You can use the command below in a terminal.
           ```bash
          mkdir -p $HOME/.google/credentials/ 
           ```
