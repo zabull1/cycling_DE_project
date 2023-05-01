@@ -53,7 +53,7 @@ In this section, we cover how to setup our GCP environment.
     
   - **Create a VM**
 
-	- In Google Cloud Console, navigate to Compute Engine > VM instances.  You may have to activate the APi for the Compute Engine when you first 		come here.
+	- In Google Cloud Console, navigate to Compute Engine > VM instances.  You may have to activate the API for the Compute Engine when you first 		come here if you have not already done that at thepoint of creating a new project
 
 	- Click the `Create Instance` action towards the top.  On the next screen, you'll want to set the following information:
 
