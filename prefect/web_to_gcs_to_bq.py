@@ -13,8 +13,8 @@ from prefect_gcp.bigquery import BigQueryWarehouse
 from prefect_dbt.cli.commands import DbtCoreOperation
 from chardet.universaldetector import UniversalDetector
 
-project_name = ""
-bucket_name = ""
+project_name = "" #insert your project name here
+bucket_name = "" #insert your bucket name
 
 @task(log_prints=True, name="Read cycling data", retries=3)
 def extract_from_web(url: str) -> bytes:
