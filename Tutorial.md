@@ -63,8 +63,9 @@ In this tutorial, we will walk through the process of reproducing the Transport 
 	- change the directory to prefect folder using `cd`
 	- Log in to the Prefect Cloud dashboard		
 		- `prefect cloud login -k [api_key]`
-	- Edit `blocks.py` by inserting the service account credentials and bucket name
-	- Edit `web_to_gcs_to_bq.py`
+	- Edit `blocks.py` by inserting bucket name
+	- Edit `web_to_gcs_to_bq.py` with your project and bucket name
+	- Edit `profiles.yml` file in dbt folder with location of your gcp resources (for example: europe-west1)
 	- Create the prefect blocks
 		- `python blocks.py` or  via the cloud UI [prefect blocks](https://docs.prefect.io/concepts/blocks/)
 	- Deploy the pipeline (Please note this takes around one and a half hour to complete)
