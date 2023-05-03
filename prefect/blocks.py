@@ -1,23 +1,25 @@
 from prefect_gcp import GcpCredentials, BigQueryWarehouse
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect_dbt.cli import BigQueryTargetConfigs, DbtCliProfile, DbtCoreOperation
+from pathlib import Path
+
 
 # This is an alternative to creating GCP blocks in the UI
 
 # Insert your own service_account_file path or service_account_info dictionary from the json file
 # IMPORTANT - do not store credentials in a publicly available repository!
 
+bucket_name = "" #insert your gcp bucket name here
+service_account_file = Path("~/.google/credentials/google_credentials.json")
 
-credentials_block = GcpCredentials(
-    service_account_info={}
-)
+credentials_block = GcpCredentials(service_account_file= service_account_file)
 
 credentials_block.save("gcs-credentials", overwrite=True)
 
 
 bucket_block = GcsBucket(
     gcp_credentials=GcpCredentials.load("gcs-credentials"),
-    bucket= "dtc_data_lake_cycling-385411",
+    bucket= bucket_name,
 )
 
 bucket_block.save("gcs-bucket", overwrite=True)
@@ -36,7 +38,7 @@ target_configs = BigQueryTargetConfigs(
 target_configs.save("bq-block-dbt", overwrite=True)
 
 dbt_cli_profile = DbtCliProfile(
-    name="cycling-dbt-cli-profile",
+    name="default",
     target="dev",
     target_configs=target_configs,
 )
