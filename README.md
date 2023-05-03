@@ -47,9 +47,6 @@ This project aims to build an end-to-end orchestrated data pipeline. The pipelin
 - Partitioned on the `start_date` column as to allow for efficient data filtering based on specific date ranges.
 - Clustered on the `startstation_id` column to improve query performance and data locality.
 
-<p align="center">
-<img src="images/lotus.png">
-</p>
 
 ## How to Reproduce ?
 
