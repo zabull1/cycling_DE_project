@@ -10,7 +10,7 @@ from prefect import task, flow
 from prefect_gcp import GcpCredentials
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect_gcp.bigquery import BigQueryWarehouse
-from prefect_dbt.cli.commands import DbtCoreOperation
+from prefect_dbt.cli.commands import DbtCoreOperation, DbtCliProfile
 from chardet.universaldetector import UniversalDetector
 
 project_name = "" #insert your project name here
@@ -145,18 +145,24 @@ def dbt_model():
     """Run dbt models"""
 
     dbt_path = Path(f"../dbt/")
-
-    dbt_run = DbtCoreOperation(
+    
+    dbt_cli_profile = DbtCliProfile.load("cycling-dbt-cli-profile")
+    
+    with DbtCoreOperation(
                     commands=["dbt deps", 
                               "dbt seed -t prod", 
                               "dbt build -t prod"],
                     project_dir=dbt_path,
                     profiles_dir=dbt_path,
-    )
+                    dbt_cli_profile = dbt_cli_profile
+        
+    )as dbt_operation:
+        dbt_process = dbt_operation.trigger()
+        # do other things before waiting for completion
+        dbt_process.wait_for_completion()
+        result = dbt_process.fetch_result()
 
-    dbt_run.run()
-
-    return
+    return result
 
 
 @flow(name='Save from web to Cloud Storage to bigQuery')
