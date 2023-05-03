@@ -154,7 +154,7 @@ def dbt_model():
                               "dbt build -t prod"],
                     project_dir=dbt_path,
                     profiles_dir=dbt_path,
-                    dbt_cli_profile = dbt_cli_profile
+#                     dbt_cli_profile = dbt_cli_profile # comment out if dbt asks for a dbt_cli_profile
         
     )as dbt_operation:
         dbt_process = dbt_operation.trigger()
