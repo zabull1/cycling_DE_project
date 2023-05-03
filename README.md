@@ -6,13 +6,13 @@ Transport for London (TfL) is the organization responsible for managing and oper
 
 This project aims to build an end-to-end orchestrated data pipeline. The pipeline will fetch cycling data from https://cycling.data.tfl.gov.uk and export it to Google Cloud Storage. Then, the data will be filtered, transformed to the desired data types, and uploaded to BigQuery. In BigQuery, DBT will be used to transform the data. Finally, the data will be visualised in a dashboard.
 
-## Questions to answer 
+## Questions
 1. What is the average cycling duration?
 2. What are the top start stations
 3. what are the top 4  end stations
 
 
-## What technologies are being used?
+## Technologies
 - Cloud: `Google Cloud`
 - Infrastructure: `Terraform`
 - Orchestration: `Prefect`
@@ -21,8 +21,11 @@ This project aims to build an end-to-end orchestrated data pipeline. The pipelin
 - Data warehouse: `BigQuery`
 - Data visualization: `Google Looker Studio`
 
-
-## Structure of the Production Table
+## Architecture
+<p align="center">
+<img src="images/Cycling_DE_Project_Architecture.png" width="800">
+</p>
+## Dataset
 
 | Column | Description | 
 |--------|-------------|
@@ -45,11 +48,11 @@ This project aims to build an end-to-end orchestrated data pipeline. The pipelin
 <img src="images/lotus.png">
 </p>
 
-## How to make it work?
+## How to Reproduce ?
 
-Please check the [tutotial](Tutorial.md)
+Please check the [tutotial](Tutorial.md) to succesfully run the pipeline
 
-## Dashboard example
+## Dashboard
 [Click here](https://lookerstudio.google.com/u/3/reporting/fbadcee0-64bf-4771-8187-960e6ad0f0fa/page/6g7MD) to see my Looker dashboard.
 
 <p align="center">
