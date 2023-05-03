@@ -6,7 +6,7 @@
             "data_type": "timestamp",
             "granularity": "day",
         },
-        cluster_by="StartStation_id",
+        cluster_by="startstation_id",
     ) 
 }}
 
