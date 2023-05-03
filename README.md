@@ -25,6 +25,8 @@ This project aims to build an end-to-end orchestrated data pipeline. The pipelin
 <p align="center">
 <img src="images/Cycling_DE_Project_Architecture.png" width="800">
 </p>
+
+
 ## Dataset
 
 | Column | Description | 
