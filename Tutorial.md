@@ -7,6 +7,7 @@ In this tutorial, we will walk through the process of reproducing the Transport 
 - Basic knowledge of Python programming
 - Familiarity with data engineering concepts
 - Access to a Google Cloud Platform (GCP) account
+- Basic knowledge of command-line
 
 ## Setup
 
