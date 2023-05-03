@@ -2,14 +2,6 @@ default:
   target: dev
   outputs:
     dev:
-      type: bigquery
-      method: service-account
-      dataset: cycling_dev
-      threads: 4
-      keyfile: "../../.google/credentials/google_credentials.json"
-      timeout_seconds: 300
-      location: 
-      priority: interactive
     prod:
       type: bigquery
       method: service-account
