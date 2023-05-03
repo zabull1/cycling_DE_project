@@ -62,4 +62,6 @@ Please check the [tutotial](Tutorial.md) to recreate the project
 ## Reference
 
 - [divvy-data-pipeline](https://github.com/ETM1123/divvy-data-pipeline.git)
-
+- [mpls-311-data](https://github.com/mikecolemn/mpls-311-data.git)
+- [magic-the-gathering](https://github.com/VincenzoGalante/magic-the-gathering.git)
+- [sf_eviction](https://github.com/sanyassyed/sf_eviction.git)
