@@ -63,10 +63,11 @@ In this tutorial, we will walk through the process of reproducing the Transport 
 	- change the directory to prefect folder using `cd`
 	- Log in to the Prefect Cloud dashboard		
 		- `prefect cloud login -k [api_key]`
-	- Edit blocks.py by inserting the service account credentials and bucket name
+	- Edit `blocks.py` by inserting the service account credentials and bucket name
+	- Edit `web_to_gcs_to_bq.py`
 	- Create the prefect blocks
 		- `python blocks.py` or  via the cloud UI [prefect blocks](https://docs.prefect.io/concepts/blocks/)
-	- Deploy the pipeline
+	- Deploy the pipeline (Please note this takes around one and a half hour to complete)
 		- `python deploy_web_to_gcs_to_bq.py`
 		- in Cloud UI, goto Deployment and a start a quick run
 		- in terminal, run below command
