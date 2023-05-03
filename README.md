@@ -43,8 +43,9 @@ This project aims to build an end-to-end orchestrated data pipeline. The pipelin
 
 
 - Here the dbt lineage graph <img src="images/dbt_model_linage.png" width="400">
-- Partitioned on the `released_at` column - in favor of question 1 and 3 - assuming that in most cases, cards with the same release date are from the same set
-- Clustered on the `color_category` column - in favor of question 2 - assuming that within one set the number of colors is lower than the numbers of unique prices and artists
+
+- Partitioned on the `start_date` column as to allow for efficient data filtering based on specific date ranges.
+- Clustered on the `startstation_id` column to improve query performance and data locality.
 
 <p align="center">
 <img src="images/lotus.png">
@@ -55,7 +56,7 @@ This project aims to build an end-to-end orchestrated data pipeline. The pipelin
 Please check the [tutotial](Tutorial.md) to recreate the project
 
 ## Dashboard
-[Click here](https://lookerstudio.google.com/u/3/reporting/fbadcee0-64bf-4771-8187-960e6ad0f0fa/page/6g7MD) to see my Looker dashboard.
+[Click here](https://lookerstudio.google.com/u/3/reporting/fbadcee0-64bf-4771-8187-960e6ad0f0fa/page/6g7MD) to access my dashboard on Looker.
 
 <p align="center">
 <img src="images/dashboard.png" width="800">
