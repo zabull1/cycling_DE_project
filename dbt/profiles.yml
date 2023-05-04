@@ -9,5 +9,5 @@ default:
       threads: 4
       keyfile: "../../.google/credentials/google_credentials.json"
       timeout_seconds: 300
-      location: 
+      location:   #enter location of your gcp resources (e.g europe-west1)
       priority: interactive
